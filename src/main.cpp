@@ -1,100 +1,42 @@
 #include <Arduino.h>
-// #include "FastShiftIn.h"
+#include "FastShiftIn.h"
 
-const byte i1_dataPin = 2;
-const byte i1_latchPin = 3;
-const byte i1_clockPin = 4;
+/*
+  74HC165 Shift Register Demonstration 1
+  74hc165-demo.ino
+  Read from 8 switches and display values on serial monitor
 
-const byte i2_dataPin = 8;
-const byte i2_latchPin = 9;
-const byte i2_clockPin = 10;
+  DroneBot Workshop 2020
+  https://dronebotworkshop.com
+*/
 
-const byte i1_inputA = 7; // saturation btn
-const byte i1_inputB = 6; // brightness btn
-const byte i1_inputC = 5; // idle action switch
-const byte i1_inputD = 4; // mode select switch
-const byte i1_inputE = 3; // main plate pressed
-const byte i1_inputF = 2; // encoder button
-const byte i1_inputG = 1; //
-const byte i1_inputH = 0; //
+// Define Connections to 74HC165
 
-const byte i2_inputA = 0; // multi-select positions
-const byte i2_inputB = 1; // ...
-const byte i2_inputC = 2; //
-const byte i2_inputD = 3; //
-const byte i2_inputE = 4; //
-const byte i2_inputF = 5; //
-const byte i2_inputG = 6; //
-const byte i2_inputH = 7; // ...
+// PL pin 1
+int load = 10;
+// CE pin 15
+int clockEnablePin = 12;
+// Q7 pin 7
+int dataIn = 11;
+// CP pin 2
+int clockIn = 9;
 
 void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(9600);
 
-    while (!Serial);
+    while (!Serial)
+        ;
 
-    pinMode(i1_dataPin, INPUT);
-    pinMode(i2_dataPin, INPUT);
-    pinMode(i1_latchPin, OUTPUT);
-    pinMode(i2_latchPin, OUTPUT);
-    pinMode(i1_clockPin, OUTPUT);
-    pinMode(i2_clockPin, OUTPUT);
+    // Setup 74HC165 connections
+    pinMode(load, OUTPUT);
+    pinMode(clockEnablePin, OUTPUT);
+    pinMode(clockIn, OUTPUT);
+    pinMode(dataIn, INPUT);
 }
 
-const unsigned long SamplePeriod = 3000; // sampling period in milliseconds
-
-uint8_t isrReadRegister(byte data, byte latch, byte clock)
-{
-    uint8_t inputs = 0;
-    digitalWrite(clock, HIGH);               // preset clock to retrieve first bit
-    digitalWrite(latch, HIGH);               // disable input latching and enable shifting
-    inputs = shiftIn(data, clock, MSBFIRST); // capture input values
-    digitalWrite(latch, LOW);                // disable shifting and enable input latching
-    return inputs;
-}
-int isrDigitalRead(boolean i1, uint8_t pin)
-{
-    uint8_t value = i1 ? isrReadRegister(i1_dataPin, i1_latchPin, i1_clockPin) : isrReadRegister(i2_dataPin, i2_latchPin, i2_clockPin);
-    return bitRead(value, pin);
-}
-void readInputsWithDigitalRead(boolean i1)
-{
-    // Read and print individual inputs
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input A = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputA : i2_inputA) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input B = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputB : i2_inputB) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input C = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputC : i2_inputC) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input D = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputD : i2_inputD) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input E = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputE : i2_inputE) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input F = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputF : i2_inputF) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input G = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputG : i2_inputG) ? "HIGH" : "LOW");
-    Serial.print(i1 ? "Input 1 " : "Input 2 ");
-    Serial.print("Input H = ");
-    Serial.println(isrDigitalRead(i1, i1 ? i1_inputH : i2_inputH) ? "HIGH" : "LOW");
-    Serial.println();
-}
-
-void readInputsWithBinaryValues(boolean i1) {
-   // Read and print all inputs from shift register in binary format
-   Serial.print("Inputs: 0b");
-   uint8_t value = i1 ? isrReadRegister(i1_dataPin, i1_latchPin, i1_clockPin) : isrReadRegister(i2_dataPin, i2_latchPin, i2_clockPin);
-   Serial.println(value, BIN);
-}
-
+const unsigned long SamplePeriod = 500; // sampling period in milliseconds
 
 void loop()
 {
@@ -103,8 +45,24 @@ void loop()
     unsigned long currentTime = millis();
     if (currentTime - previousTime >= SamplePeriod)
     {
-        readInputsWithBinaryValues(true);
-        // readInputsWithDigitalRead(false);
+        // interval trigger
+
+        // Write pulse to load pin
+        digitalWrite(load, LOW);
+        delayMicroseconds(5);
+        digitalWrite(load, HIGH);
+        delayMicroseconds(5);
+
+        // Get data from 74HC165
+        digitalWrite(clockIn, HIGH);
+        digitalWrite(clockEnablePin, LOW);
+        byte incoming = shiftIn(dataIn, clockIn, LSBFIRST);
+        digitalWrite(clockEnablePin, HIGH);
+
+        // Print to serial monitor
+        Serial.print("Pin States:\r\n");
+        Serial.println(incoming, BIN);
+
         previousTime = currentTime;
     }
 }
