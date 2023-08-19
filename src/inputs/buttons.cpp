@@ -1,5 +1,10 @@
+#include <Arduino.h>
+#include "buttons.h"
 
-
+void SetupButtons() {
+    
+    Serial.println("SETUP BUTTONS");
+}
 
 
 bool ContrastHeld() {
