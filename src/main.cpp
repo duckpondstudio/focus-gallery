@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "inputManager.h"
 #include "FastShiftIn.h"
 
 /*
@@ -27,7 +28,10 @@ void setup()
     Serial.begin(9600);
 
     while (!Serial)
-        ;
+    {
+    };
+
+    SetupInputManager();
 
     // Setup 74HC165 connections
     pinMode(load, OUTPUT);
