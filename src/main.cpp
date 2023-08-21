@@ -22,6 +22,7 @@ int dataIn = 11;
 // CP pin 2
 int clockIn = 9;
 
+
 void setup()
 {
     // put your setup code here, to run once:
@@ -44,6 +45,10 @@ const unsigned long SamplePeriod = 500; // sampling period in milliseconds
 
 void loop()
 {
+    LoopInputManager();
+}
+
+void ShiftInTest() {
     // Read and print inputs at the specified sampling rate
     static unsigned long previousTime = 0;
     unsigned long currentTime = millis();

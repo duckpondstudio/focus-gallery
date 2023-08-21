@@ -6,3 +6,7 @@ void SetupInputManager() {
     SetupRotaryEnc();
     SetupButtons();
 }
+
+void LoopInputManager() {
+    LoopRotaryEnc();
+}

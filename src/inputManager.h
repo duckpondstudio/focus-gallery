@@ -2,5 +2,6 @@
 #define INPUTMANAGER_H
 
 extern void SetupInputManager();
+extern void LoopInputManager();
 
 #endif
