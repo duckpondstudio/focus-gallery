@@ -43,10 +43,6 @@ void setup()
 
 const unsigned long SamplePeriod = 500; // sampling period in milliseconds
 
-void loop()
-{
-    LoopInputManager();
-}
 
 void ShiftInTest() {
     // Read and print inputs at the specified sampling rate
@@ -58,9 +54,9 @@ void ShiftInTest() {
 
         // Write pulse to load pin
         digitalWrite(load, LOW);
-        delayMicroseconds(5);
+        delay(1);
         digitalWrite(load, HIGH);
-        delayMicroseconds(5);
+        delay(1);
 
         // Get data from 74HC165
         digitalWrite(clockIn, HIGH);
@@ -74,4 +70,11 @@ void ShiftInTest() {
 
         previousTime = currentTime;
     }
+}
+
+
+void loop()
+{
+    LoopInputManager();
+    // ShiftInTest();
 }
