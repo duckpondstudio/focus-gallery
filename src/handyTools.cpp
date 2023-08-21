@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "handyTools.h"
 
 void ReadByte(byte b) {
     Serial.print("Byte: ");
