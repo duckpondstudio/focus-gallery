@@ -1,0 +1,4 @@
+#ifndef SHIFTREGINPUT_H
+#define SHIFTREGINPUT_H
+
+#endif
