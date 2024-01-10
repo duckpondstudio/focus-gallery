@@ -12,13 +12,14 @@ private:
     byte updateStep = 0;
 
 public:
+    byte enabled;
     SandTimer intervalTimer;
     byte data = 0;
     byte pin_Load;
     byte pin_Clock;
     byte pin_ChipEnable;
     byte pin_Data;
-    ShiftRegisterInput(byte PIN_LOAD, byte PIN_CLOCK, byte PIN_CE, byte PIN_DATA)
+    ShiftRegisterInput(byte PIN_LOAD, byte PIN_CLOCK, byte PIN_CE, byte PIN_DATA, bool ENABLE = true)
     {
         pin_Load = PIN_LOAD;
         pin_Clock = PIN_CLOCK;
@@ -29,10 +30,16 @@ public:
         pinMode(pin_ChipEnable, OUTPUT);
         pinMode(pin_Data, INPUT);
         updateStep = 0;
+        enabled = ENABLE;
     }
     // call via loop, handles shift register update
     void Update()
     {
+        // ensure enabled 
+        if (!enabled) {
+            return;
+        }
+        // check current logic step 
         switch (updateStep)
         {
         default:
@@ -76,7 +83,7 @@ public:
             break;
         }
     }
-    // forces a shift register state update, if one is not already occurring
+    // forces a shift register state update, if one is not already occurring. Does NOT bypass enabled flag
     void ForceUpdate()
     {
         if (updateStep == 0)
@@ -91,6 +98,7 @@ public:
     {
         return bitRead(data, pinNum);
     }
+    // Outputs this shift register's pin state to serial 
     void DebugOutputData()
     {
         ReadByte(data);
@@ -108,4 +116,6 @@ void SetupShiftRegInput()
 void LoopShiftRegInput()
 {
     sriTimer.Update();
+    sriInput.Update();
+    sriSound.Update();
 }
